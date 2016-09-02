@@ -29,7 +29,7 @@ from Crypto.Cipher import AES
 
 #load configuration file
 Config = ConfigParser.ConfigParser()
-Config.read("./yubiauth.conf")
+Config.read("./etc/yubiauth.conf")
 
 #config function
 def ConfigSectionMap(section):
