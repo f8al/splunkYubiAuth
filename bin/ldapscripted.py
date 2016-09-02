@@ -61,47 +61,24 @@ def decryptString(string):
 #----------------------------------------------------------------------------
 
 
-use_mdslab = False
-if use_mdslab == True:
-    ldap_servers = [ '' ]
+    ldap_servers = configSectionMap('ldapSettings')['ldap_servers']
 
     # Options to enable/disable certificate verification
     # Should be ssl.CERT_NONE or ssl.CERT_REQUIRED
     ldap_cert_verification = ssl.CERT_NONE
-    ldap_certs_file = 'cacerts.pem'
+    ldap_certs_file = configSectionMap('ldapSettings')['ldap_certs_file']
 
-    group_base_dn = ''
-    user_base_dn = ''
-    service_account_user = ''
-    service_account_pass = decryptString('')
-    
+    group_base_dn = configSectionMap('ldapSettings')['group_base_dn']
+    user_base_dn = configSectionMap('ldapSettings')['user_base_dn']
+    service_account_user = configSectionMap('ldapSettings')['SA_User']
+    service_account_pass = configSectionMap('ldapSettings')['SA_Pass']
+
     ## These keys, if defined, work for everyone
-    #testing_yubikeys = [ ]
-
+    testing_yubikeys = ConfigSectionMap("yubikeySettings")['testKeys']
 
     # These users, if defined, skip the LDAP bind 1st factor
     # This is obviously HORRIBLY INSECURE
-    skip_first_factor_users = [  ]
-
-else:
-    ldap_servers = [ '' ]
-
-    # Options to enable/disable certificate verification
-    # Should be ssl.CERT_NONE or ssl.CERT_REQUIRED
-    ldap_cert_verification = ssl.CERT_NONE
-    ldap_certs_file = 'cacerts.pem'
-
-    group_base_dn = ''
-    user_base_dn = ''
-    service_account_user = ''
-    service_account_pass = ''
-
-    ## These keys, if defined, work for everyone
-    #testing_yubikeys = [ ]
-
-    # These users, if defined, skip the LDAP bind 1st factor
-    # This is obviously HORRIBLY INSECURE
-    skip_first_factor_users = [  ]
+    skip_first_factor_users = ConfigSectionMap("globalSettings")['skip_auth_users']
 
 
 
@@ -111,12 +88,8 @@ else:
 
 groups_to_roles = {
 
-   'DL--GTM-InfoSecOps' : ['power','user'],
-   'DL--GTM-Engineering' : ['admin','user','ess_user','ess_analyst','ess_admin','power'],
-   'DL--GTM-SCC-L1' : ['ess_user','ess_analyst','user'],
-   'DL--GTM-SCC-L2' : ['ess_analyst','ess_user','l2_edit_lookups','l3_analyst_review','user'],
-   'DL--GTM-SCC-L3' : ['admin','ess_admin','ess_analyst','ess_user','user'],
-   'DL--GTM-SCC-UseCaseDevelopers' : ['admin','ess_admin','ess_analyst','ess_user','user']
+   'splunk_user_dl' = ConfigSectionMap("ldapSettings")['splunk_user_dl'] : ['user'],
+   'splunk_admin_dl' = ConfigSectionMap("ldapSettings")['splunk_admin_dl'] : ['admin','user']
 }
 
 
@@ -387,8 +360,6 @@ def userLogin(args):
         return
   
     try:
-       # Michael Dore said that all we needed was the Username and the Secret.
-       # Specifically, we don't need a NAS_identifier.
        srv = Client(server="auth.radius.com", secret="",
            dict = Dictionary("dictionary"))
        req = srv.CreateAuthPacket(code=pyrad.packet.AccessRequest, 
