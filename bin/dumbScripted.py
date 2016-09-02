@@ -2,13 +2,40 @@ from __future__ import print_function
 
 import sys
 import logging
+import ConfigParser
 from commonAuth import *
 from passlib.hash import sha512_crypt
 from yubico_client import Yubico
 
-yubicloud_client_id='26164'
-yubicloud_secret_key='B6QFZuBBXIRxgpGGwyQuCqe66eg='
 
+
+
+#method for reading config
+Config = ConfigParser.ConfigParser()
+Config.read ('../etc/yubiauth.conf')
+
+#config function
+def ConfigSectionMap(section):
+    dict1 = {}
+    options = Config.options(section)
+    for option in options:
+        try:
+            dict1[option] = Config.get(section, option)
+            if dict1[option] == -1:
+                DebugPrint("skip: %s" % option)
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+    return dict1
+
+
+
+##########################
+# some configuration stuff
+###########################
+yubicloud_client_id = ConfigSectionMap("yubikeySettings")['yubicloud_client_id']
+yubicloud_secret_key= ConfigSectionMap("yubikeySettings")['yubicloud_secret_key']
+passwdFile = ConfigSectionMap("globalSettings")['passwd']
 
 logging.basicConfig()
 logger=logging.getLogger()
@@ -135,7 +162,7 @@ def getSearchFilter( args ):
 
 if __name__ == "__main__":
 
-    p = PasswdFile('../etc/passwd')
+    p = PasswdFile('passwdFile')
 
     callName = sys.argv[1]
     dictIn = readInputs()
