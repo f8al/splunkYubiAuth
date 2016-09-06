@@ -16,3 +16,4 @@ README
     - requests[security]
     - ldap3
     - more-itertools
+    - ConfigParser
